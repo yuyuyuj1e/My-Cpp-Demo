@@ -14,6 +14,7 @@ private:
     int readn();
 public:
     TcpSocket();  // 默认构造函数，创建套接字
+    TcpSocket(int);  // 默认构造函数，创建套接字
     ~TcpSocket();  // 关闭连接
 
     /* 接口 */

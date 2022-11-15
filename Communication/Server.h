@@ -1,5 +1,5 @@
-#ifndef SERVER_H__
-#define SERVER_H__
+#ifndef TCP_SERVER_H__
+#define TCP_SERVER_H__
 
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -17,6 +17,7 @@ public:
 
     /* 接口 */
     int setListen(in_port_t, int max_port_size = 128);  // 设置监听, in_port_t <==> unsigned short int
+    TcpSocket* acceptConnection(sockaddr_in*);  // 接受连接请求
 };
 
 // 默认构造函数
@@ -53,10 +54,29 @@ int TcpServer::setListen(in_port_t port, int max_port_size) {
         std::cerr << "listen failed" << std::endl;
         return listen_ret;
     }
-    std::cout << "开始监听客户端连接" << std::endl;
+    std::cout << "开始监听客户端连接请求..." << std::endl;
 
     return listen_ret;
 }
 
 
-#endif  //  SERVER_H__
+// 接受连接请求
+TcpSocket* TcpServer::acceptConnection(sockaddr_in* addr) {
+    /* 特殊处理 */
+    if (addr == NULL) {
+        return nullptr;
+    }
+
+    /* 接受连接请求 */
+    socklen_t addrlen = sizeof(struct sockaddr_in);  // socklen_t <==> unsigned int
+    int cfd = accept(this->m_fd, (struct sockaddr*)addr, &addrlen);
+    if (cfd == -1) {
+        std::cerr << "accept failed" << std::endl;
+        return nullptr;
+    }
+    std::cout << "与客户端连接..." << std::endl;
+
+    return new TcpSocket(cfd);
+}
+
+#endif  //  TCP_SERVER_H__
