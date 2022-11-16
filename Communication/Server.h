@@ -12,6 +12,7 @@ private:
     int m_fd;  // 监听套接字
     struct sockaddr_in m_saddr;  // sockaddr 端口(2字节) + IP地址(4字节) + 填充(8字节)
 public:
+    /* 构造函数与析构函数 */
     TcpServer();  // 默认构造函数
     ~TcpServer();  // 析构函数
 

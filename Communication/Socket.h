@@ -10,11 +10,15 @@ class TcpSocket {
 private:
     /* 私有成员变量 */
     int m_fd;  // 通信套接字
+
 private:
-    int readn();
+    /* 私有成员函数 */
+    int readn();  // 解决“粘包问题”
+
 public:
+    /* 构造函数与析构函数 */
     TcpSocket();  // 默认构造函数，创建套接字
-    TcpSocket(int);  // 默认构造函数，创建套接字
+    TcpSocket(int);  // 接收一个用于通信的建套接字
     ~TcpSocket();  // 关闭连接
 
     /* 接口 */
@@ -26,6 +30,10 @@ public:
 
 TcpSocket::TcpSocket() 
     : m_fd(socket(AF_INET, SOCK_STREAM, 0)) 
+{ }
+
+TcpSocket::TcpSocket(int socket_fd) 
+    : m_fd(socket_fd)
 { }
 
 TcpSocket::~TcpSocket() {

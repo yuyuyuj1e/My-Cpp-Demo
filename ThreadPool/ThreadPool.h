@@ -1,3 +1,12 @@
+/**
+ * @author: yuyuyuj1e 807152541@qq.com
+ * @github: https://github.com/yuyuyuj1e
+ * @date: 2022-11-10 18:17:23
+ * @last_edit_time: 2022-11-16 11:46:03
+ * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/ThreadPool/ThreadPool.h
+ * @description: 带有任务优先级的多模式线程池
+ */
+
 #ifndef THREAD_POOL_H__
 #define THREAD_POOL_H__ 1
 
@@ -68,7 +77,10 @@ public:
 ***************************任务队列实现***************************
 */
 
-// 队列是否为空
+/**
+ * @description: 判断任务队列是否为空
+ * @return {bool} this->m_safe_queue.empty()
+ */
 template<typename T>
 bool SafeQueue<T>::isSafeQueueEmpty() {
 	std::unique_lock<std::mutex> lock(this->m_safe_queue_mutex);  // 任务队列上锁
@@ -77,7 +89,11 @@ bool SafeQueue<T>::isSafeQueueEmpty() {
 }
 
 
-// 任务队列大小
+
+/**
+ * @description: 获取任务队列大小
+ * @return {size_t} this->m_safe_queue.size()
+ */
 template<typename T>
 size_t SafeQueue<T>::safeQueueSize() {
 	std::unique_lock<std::mutex> lock(this->m_safe_queue_mutex);  // 任务队列上锁
@@ -86,7 +102,11 @@ size_t SafeQueue<T>::safeQueueSize() {
 }
 
 
-// 添加任务
+/**
+ * @description: 向任务队列添加任务
+ * @param {T} t: 任务函数
+ * @param {size_t} priority: 任务优先级
+ */
 template<typename T>
 void SafeQueue<T>::taskEnqueue(T &t, size_t priority) {
 	std::unique_lock<std::mutex> lock(this->m_safe_queue_mutex);
@@ -99,7 +119,11 @@ void SafeQueue<T>::taskEnqueue(T &t, size_t priority) {
 }
 
 
-// 取出任务
+/**
+ * @description: 是否可以从任务队列取出任务，如可以取出任务
+ * @param {T} t: 获取任务函数的空函数
+ * @return {bool} true/false
+ */
 template<typename T>
 bool SafeQueue<T>::taskDequeue(T &t) {
 	std::unique_lock<std::mutex> lock(this->m_safe_queue_mutex); // 任务队列上锁
@@ -212,9 +236,12 @@ public:
 ***************************线程池的实现***************************
 */
 
+// 初始线程 ID
 int ThreadPool::m_threads_id = 1;
 
-// 默认构造函数，线程数量为可用硬件实现支持的并发线程数
+/**
+ * @description: 默认构造函数，线程数量为可用硬件实现支持的并发线程数
+ */
 ThreadPool::ThreadPool()
 	: m_is_close_thread_pool(false) 
 	, m_max_task_amount(2 * std::thread::hardware_concurrency())
@@ -240,7 +267,11 @@ ThreadPool::ThreadPool()
 }
 
 
-// 含参构造函数
+/**
+ * @description: 含参构造函数
+ * @param {size_t} n_threads: 最低线程数量
+ * @param {ThreadPoolWorkMode} work_mode: 线程池工作模式
+ */
 ThreadPool::ThreadPool(const size_t n_threads, ThreadPoolWorkMode work_mode)
 	: m_is_close_thread_pool(false)
 	, m_max_task_amount(2 * n_threads)
@@ -275,13 +306,17 @@ ThreadPool::ThreadPool(const size_t n_threads, ThreadPoolWorkMode work_mode)
 }
 
 
-// 析构函数，关闭线程池
+/**
+ * @description: 析构函数，关闭线程池
+ */
 ThreadPool::~ThreadPool() {
 	this->closeThreadPool();
 }
 
 
-// 等待线程完成工作，然后关闭线程池
+/**
+ * @description: 等待线程完成工作，然后关闭线程池
+ */
 void ThreadPool::closeThreadPool() {
 	// 判断
 	if (this->m_is_close_thread_pool) {
@@ -306,46 +341,73 @@ void ThreadPool::closeThreadPool() {
 }
 
 
-// 获取线程数量
+/**
+ * @description: 获取线程池线程数量
+ * @return {size_t} this->m_threads.size()
+ */
 inline size_t ThreadPool::getThreadsAmount() {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 	return this->m_threads.size();
 }
 
-// 获取任务量最大值
+
+/**
+ * @description: 获取线程池任务量最大值
+ * @return {size_t} this->m_max_task_amount
+ */
 inline size_t ThreadPool::getTaskMaxAmount() {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 	return this->m_max_task_amount;
 }
 
-// 设置任务量最大值
+
+/**
+ * @description: 设置线程池任务量最大值
+ * @param {size_t} max: 任务量最大值
+ */
 inline void ThreadPool::setTaskMaxAmount(size_t max) {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 	this->m_max_task_amount = max;
 }
 
-// 设置超时时长
+
+/**
+ * @description: 通过 chrono::milliseconds 修改超时时长
+ * @param {milliseconds} new_timeout: 新的超时时长
+ */
 inline void ThreadPool::setTaskTimeoutByMilliseconds(std::chrono::milliseconds new_timeout) {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 
 	this->m_task_timeout = new_timeout;
 }
 
-// 设置超时时长
+
+/**
+ * @description: 通过 chrono::seconds 修改超时时长
+ * @param {seconds} new_timeout: 新的超时时长
+ */
 inline void ThreadPool::setTaskTimeoutBySeconds(std::chrono::seconds new_timeout) {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 
 	this->m_task_timeout = std::chrono::duration_cast<std::chrono::milliseconds>(new_timeout);
 }
 
-// 获取任务优先级
+
+/**
+ * @description: 获取当前设置的任务优先级
+ * @return {size_t} this->m_priority_level
+ */
 inline size_t ThreadPool::getTaskPriority() {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 
 	return this->m_priority_level;
 }
 
-// 设置任务优先级
+
+/**
+ * @description: 修改当前设置的任务优先级
+ * @param {size_t} priority: 任务优先级
+ */
 inline void ThreadPool::setTaskPriority(size_t priority) {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 
@@ -353,7 +415,9 @@ inline void ThreadPool::setTaskPriority(size_t priority) {
 }
 
 
-// 展示线程池工作模式
+/**
+ * @description: 展示线程池工作模式
+ */
 void ThreadPool::showThreadPoolWorkMode() {
 	std::unique_lock<std::mutex> lock(this->m_thread_pool_mutex);
 
@@ -367,7 +431,9 @@ void ThreadPool::showThreadPoolWorkMode() {
 }
 
 
-// 初始化线程池
+/**
+ * @description: 初始化线程池
+ */
 void ThreadPool::initThreadPool() {
 	for (int i = 0; i < this->m_min_thread_threshold; ++i) {
 		// std::thread 调用类的成员函数需要传递类的一个对象作为参数， 由于是 operator() 下面两种写法都可以，如果是类内部，传入 this 指针即可
@@ -379,7 +445,12 @@ void ThreadPool::initThreadPool() {
 }
 
 
-// 提交异步执行的函数
+/**
+ * @description: 提交异步执行的函数
+ * @param {Func} &: 任务函数
+ * @param {Args &&...} args: 任务函数参数
+ * @return {std::future<decltype(func(args...))>} 任务函数形成的 future
+ */
 template <typename Func, typename... Args>
 auto ThreadPool::submitTask(Func &&func, Args &&... args) -> std::future<decltype(func(args...))> {
 
@@ -451,14 +522,20 @@ auto ThreadPool::submitTask(Func &&func, Args &&... args) -> std::future<decltyp
 ***************************线程池内部类的实现***************************
 */
 
-// 构造函数
+/**
+ * @description: 工作线程构造函数
+ * @param {ThreadPool} *pool: 工作线程所属线程池
+ * @param {int} id: 工作线程 ID
+ */
 ThreadPool::Worker::Worker(ThreadPool *pool, const int id) 
 	: m_pool(pool)
 	, m_id(id)
 { }
 
 
-// 重载 ()
+/**
+ * @description: 重载 ()，这里是工作线程的工作函数，提交的函数会在这里执行
+ */
 void ThreadPool::Worker::operator()() {
 	std::function<void()> func;  // 存放真正执行的函数
 	bool dequeued = false;  // 是否取出任务
