@@ -1,8 +1,9 @@
 /**
  * @author: yuyuyuj1e 807152541@qq.com
  * @github: https://github.com/yuyuyuj1e
+ * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-10 18:17:23
- * @last_edit_time: 2022-11-16 11:46:03
+ * @last_edit_time: 2022-11-17 19:36:55
  * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/ThreadPool/ThreadPool.h
  * @description: 带有任务优先级的多模式线程池
  */
