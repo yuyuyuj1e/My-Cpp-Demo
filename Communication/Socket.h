@@ -75,8 +75,8 @@ void TcpSocket::closeTcpSocket() {
 
 /**
  * @description: 用于解决 TCP “粘包”问题，读取指定长度数据
- * @param {char*} buf: 
- * @param {int} size: 数据长度
+ * @param {char*} message_buff: 
+ * @param {int} length: 数据长度
  * @return {int}: 失败返回 -1, 成功返回读取的数据长度
  */
 int TcpSocket::readSpecLength(char* message_buff, int length) {
@@ -102,7 +102,7 @@ int TcpSocket::readSpecLength(char* message_buff, int length) {
 
 /**
  * @description: 用于解决 TCP “粘包”问题，写入指定长度数据
- * @param {char*} message: 写数据的地址 
+ * @param {char*} message_buff: 写数据的地址 
  * @param {int} length: 数据长度
  * @return {int}: 失败返回 -1，成功返回发送数据长度
  */
