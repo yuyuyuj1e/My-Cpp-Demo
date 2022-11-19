@@ -1,3 +1,13 @@
+/**
+ * @author: yuyuyuj1e 807152541@qq.com
+ * @github: https://github.com/yuyuyuj1e
+ * @csdn: https://blog.csdn.net/yuyuyuj1e
+ * @date: 2022-11-17 19:40:14
+ * @last_edit_time: 2022-11-19 12:15:36
+ * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/Socket.h
+ * @description: 封装通信套接字类，实现 string/char* 消息发送与接受（有处理 TCP"粘包"）等功能
+ */
+
 #ifndef TCP_SOCKET_H__
 #define TCP_SOCKET_H__
 
@@ -28,6 +38,7 @@ public:
 
     /* 接口 */
     int sendMessage(std::string);  // 发送信息
+    int sendMessage(const char*, size_t);  // 发送信息
     std::string recvMessage();  // 接收信息
     void closeTcpSocket();  // 关闭套接字
     int connectToHost(std::string, unsigned short);  // 连接服务器
@@ -68,7 +79,7 @@ void TcpSocket::closeTcpSocket() {
     // 如果连接没有关闭，断开连接
     if (this->m_fd > 0) {
         close(this->m_fd);
-        std::cout << "套接字已关闭" << std::endl;
+        std::cout << "--------------------套接字已关闭--------------------" << std::endl;
     }
 }
 
@@ -104,7 +115,7 @@ int TcpSocket::readSpecLength(char* message_buff, int length) {
  * @description: 用于解决 TCP “粘包”问题，写入指定长度数据
  * @param {char*} message_buff: 写数据的地址 
  * @param {int} length: 数据长度
- * @return {int}: 失败返回 -1，成功返回发送数据长度
+ * @return {int}: 失败返回 -1，断开连接返回 0，成功返回发送数据长度
  */
 int TcpSocket::writeSpecLength(const char* message_buff, int length) {
     int remainder = length;
@@ -147,27 +158,55 @@ int TcpSocket::connectToHost(std::string ip, unsigned short port) {
         std::cerr << "connect failed" << std::endl;
         return -1;
     }
-    std::cout << "连接建立成功..." << std::endl;
+    std::cout << "--------------------连接建立成功--------------------" << std::endl;
+    std::cout << "服务器 IP: " << ip << " —— 端口: " << port << std::endl << std::endl;
+
     return connect_ret;
 }
 
 /**
  * @description: 发送信息
- * @param {string} message: 服务器/客户端 发送的数据
- * @return {int}: 失败返回 -1，成功返回发送数据长度
+ * @param {string} message: 服务器/客户端发送的数据
+ * @return {int}: 失败返回 -1，断开连接返回 0，成功返回发送数据长度
  */
 int TcpSocket::sendMessage(std::string message) {
     // 内存空间: 包头(存储数据长度) + 原始数据
-    char* data = new char[message.length() + 4];
+    char* data = new char[message.length() + sizeof(int)];
     int data_len = htonl(message.length());
-    memcpy(data, &data_len, 4);
-    memcpy(data + 4, message.data(), message.length());
+    memcpy(data, &data_len, sizeof(int));
+    memcpy(data + sizeof(int), message.data(), message.length());
 
-    // 发送数据
-    int ret = this->writeSpecLength(data, message.length() + 4);
+    /* 发送数据 */
+    std::cout << "--------------------正在发送数据(数据块大小: " << message.length() << ")--------------------" << std::endl;
+    int ret = this->writeSpecLength(data, message.length() + sizeof(int));
 
-    // 清理
+    /* 清理 */
     delete[] data;
+    return ret;
+}
+
+
+
+/**
+ * @description: 函数注释配置模板
+ * @param {char*} message_buff: 指向服务器/客户端发送数据首地址的指针
+ * @param {size_t} length: 数据长度
+ * @return {*}: 失败返回 -1，断开连接返回 0，成功返回发送数据长度
+ */
+int TcpSocket::sendMessage(const char* message_buff, size_t length) {
+     // 申请内存存储带有数据包头的数据
+    char* pbuff = (char*)malloc(length + sizeof(int));
+    // 将数据包长度转换为网络字节序
+    int netlen = htonl(length);
+    // 拷贝数据
+    memcpy(pbuff, &netlen, sizeof(int));
+    memcpy(pbuff + sizeof(int), message_buff, length);
+    // 发送数据
+    std::cout << "--------------------正在发送数据(数据块大小: " << length << ")--------------------" << std::endl;
+    int ret = this->writeSpecLength(pbuff, length + sizeof(int));
+
+    /* 清理 */
+    delete[] pbuff;
     return ret;
 }
 
@@ -178,19 +217,21 @@ int TcpSocket::sendMessage(std::string message) {
  */
 std::string TcpSocket::recvMessage() {
     /* 读数据包头，获取数据块大小 */
-    int len = 0;
-    readSpecLength((char*)&len, 4);
-    len = ntohl(len);  // 大端转换为小端
-    std::cout << "数据块大小: " << len << std::endl;
+    int length = 0;
+    readSpecLength((char*)&length, sizeof(int));
+    length = ntohl(length);  // 大端转换为小端
+    std::cout << "--------------------正在接受数据(数据块大小: " << length << ")--------------------"  << std::endl;
 
     /* 分配内存 */
-    char* buf = new char[len + 1];
-    int ret = readSpecLength(buf, len);
-    if (ret != len) {
+    char* buf = new char[length + 1];
+    int ret = readSpecLength(buf, length);
+    if (ret != length) {
         return std::string();
     }
-    buf[len] = '\0';
+    buf[length] = '\0';
     std::string ret_string(buf);
+
+    /* 清理 */
     delete[]buf;
 
     return ret_string;

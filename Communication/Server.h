@@ -1,3 +1,13 @@
+/**
+ * @author: yuyuyuj1e 807152541@qq.com
+ * @github: https://github.com/yuyuyuj1e
+ * @csdn: https://blog.csdn.net/yuyuyuj1e
+ * @date: 2022-11-10 18:52:49
+ * @last_edit_time: 2022-11-19 12:16:47
+ * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/Server.h
+ * @description: 封装服务器类，实现绑定端口、监听、接受连接请求等功能
+ */
+
 #ifndef TCP_SERVER_H__
 #define TCP_SERVER_H__
 
@@ -49,7 +59,7 @@ void TcpServer::closeConnection() {
     // 如果连接没有关闭，断开连接
     if (this->m_fd > 0) {
         close(this->m_fd);
-        std::cout << "套接字已关闭" << std::endl;
+        std::cout << "--------------------监听套接字已关闭--------------------" << std::endl;
     }
 }
 
@@ -71,9 +81,9 @@ int TcpServer::setListen(in_port_t port, int max_port_size) {
         std::cerr << "bind failed" << std::endl;
         return bind_ret;
     }
-    std::cout << "监听套接字绑定端口成功"
-        << ", IP: " << inet_ntoa(this->m_saddr.sin_addr)  // 将网络地址转换成点分十进制
-        << ", Port: " << port << std::endl;
+    std::cout << "--------------------监听套接字绑定端口成功--------------------" << std::endl;
+    std::cout << "IP: " << inet_ntoa(this->m_saddr.sin_addr)  // 将网络地址转换成点分十进制
+        << ", 端口: " << port << std::endl << std::endl;
 
     /* 设置监听 */
     // int listen(int sockfd, int backlog);
@@ -82,7 +92,7 @@ int TcpServer::setListen(in_port_t port, int max_port_size) {
         std::cerr << "listen failed" << std::endl;
         return listen_ret;
     }
-    std::cout << "开始监听客户端连接请求..." << std::endl;
+    std::cout << "--------------------开始监听客户端连接请求--------------------" << std::endl;
 
     return listen_ret;
 }
@@ -107,7 +117,9 @@ TcpSocket* TcpServer::acceptConnection(sockaddr_in* addr) {
         std::cerr << "accept failed" << std::endl;
         return nullptr;
     }
-    std::cout << "与客户端连接..." << std::endl;
+    std::cout << "--------------------与客户端连接--------------------" << std::endl;
+    std::cout << "客户端 IP: " << inet_ntoa(addr->sin_addr)
+        << " —— 端口: " << ntohs(addr->sin_port) << std::endl << std::endl << std::endl;
 
     return new TcpSocket(cfd);
 }
