@@ -3,7 +3,7 @@
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-17 19:40:14
- * @last_edit_time: 2022-11-19 12:15:36
+ * @last_edit_time: 2022-11-20 11:40:58
  * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/Socket.h
  * @description: 封装通信套接字类，实现 string/char* 消息发送与接受（有处理 TCP"粘包"）等功能
  */
@@ -83,7 +83,7 @@ void TcpSocket::closeTcpSocket() {
     // 如果连接没有关闭，断开连接
     if (this->m_fd > 0) {
         close(this->m_fd);
-        std::cout << "--------------------套接字已关闭--------------------" << std::endl;
+        std::cout << "--------------------通信套接字已关闭--------------------" << std::endl;
     }
 }
 
@@ -99,6 +99,7 @@ int TcpSocket::readSpecLength(char* message_buff, int length) {
     int recv_already = 0;
     char* pbuff = message_buff;
 
+    /* 读取数据 */
     while (remainder > 0) {
         // ssize_t recv(int sockfd, void *buf, size_t len, int flags);
         int recv_already = recv(this->m_fd, pbuff, remainder, 0);
@@ -106,7 +107,7 @@ int TcpSocket::readSpecLength(char* message_buff, int length) {
             pbuff += recv_already;
             remainder -= recv_already;
         }
-        else if (recv_already == -1) {
+        else {
             return recv_already;
         }
     }
@@ -131,7 +132,6 @@ int TcpSocket::writeSpecLength(const char* message_buff, int length) {
         // ssize_t send(int fd, const void *buf, size_t len, int flags);
         int send_already = send(m_fd, message_buff, remainder, 0);
         if (send_already == -1) {
-            std::cerr << "send failed" << std::endl;
             return send_already;
         }
         else if (send_already == 0) {
@@ -151,14 +151,16 @@ int TcpSocket::writeSpecLength(const char* message_buff, int length) {
  * @return {int}: 失败返回 -1, 成功返回 0
  */
 int TcpSocket::connectToHost(std::string ip, unsigned short port) {
-    /* 将 IP 和端口信息转换为大端存储 */
-    this->m_saddr.sin_port = htons(port);
+    /* 处理数据 */
+    this->m_saddr.sin_port = htons(port);  // 将 IP 和端口信息转换为大端存储
     inet_pton(AF_INET, ip.data(), &this->m_saddr.sin_addr.s_addr);
+
+    /* 建立连接 */
     // int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
     int connect_ret = connect(this->m_fd, (struct sockaddr*)&this->m_saddr, sizeof(struct sockaddr));
     if (connect_ret == -1) {
         std::cerr << "connect failed" << std::endl;
-        return -1;
+        return connect_ret;
     }
     std::cout << "--------------------连接建立成功--------------------" << std::endl;
     std::cout << "服务器 IP: " << ip << " —— 端口: " << port << std::endl << std::endl;
@@ -172,19 +174,25 @@ int TcpSocket::connectToHost(std::string ip, unsigned short port) {
  * @return {int}: 失败返回 -1，断开连接返回 0，成功返回发送数据长度
  */
 int TcpSocket::sendMessage(std::string message) {
-    // 内存空间: 包头(存储数据长度) + 原始数据
-    char* data = new char[message.length() + sizeof(int)];
+    /* 处理/拷贝数据 */
+    char* data = new char[message.length() + sizeof(int)];  // 内存空间: 包头(存储数据长度) + 原始数据
     int data_len = htonl(message.length());
     memcpy(data, &data_len, sizeof(int));
     memcpy(data + sizeof(int), message.data(), message.length());
 
     /* 发送数据 */
     std::cout << "--------------------正在发送数据(数据块大小: " << message.length() << ")--------------------" << std::endl;
-    int ret = this->writeSpecLength(data, message.length() + sizeof(int));
+    int send_ret = this->writeSpecLength(data, message.length() + sizeof(int));
+    if (send_ret == -1) {
+        std::cout << "--------------------对方断开连接--------------------" << std::endl;
+        std::cerr << "send failed" << std::endl;
+        delete[] data;
+        return send_ret;
+    }
 
     /* 清理 */
     delete[] data;
-    return ret;
+    return send_ret;
 }
 
 
@@ -196,20 +204,27 @@ int TcpSocket::sendMessage(std::string message) {
  * @return {*}: 失败返回 -1，断开连接返回 0，成功返回发送数据长度
  */
 int TcpSocket::sendMessage(const char* message_buff, size_t length) {
-     // 申请内存存储带有数据包头的数据
+    /* 申请内存 */
     char* pbuff = (char*)malloc(length + sizeof(int));
-    // 将数据包长度转换为网络字节序
-    int netlen = htonl(length);
-    // 拷贝数据
+    
+    /* 处理/拷贝数据 */
+    int netlen = htonl(length); // 将数据包长度转换为网络字节序
     memcpy(pbuff, &netlen, sizeof(int));
     memcpy(pbuff + sizeof(int), message_buff, length);
-    // 发送数据
+    
+    /* 发送数据 */
     std::cout << "--------------------正在发送数据(数据块大小: " << length << ")--------------------" << std::endl;
-    int ret = this->writeSpecLength(pbuff, length + sizeof(int));
+    int send_ret = this->writeSpecLength(pbuff, length + sizeof(int));
+    if (send_ret == -1) {
+        std::cout << "--------------------对方断开连接--------------------" << std::endl;
+        std::cerr << "send failed" << std::endl;
+        delete[] pbuff;
+        return send_ret;
+    }
 
     /* 清理 */
     delete[] pbuff;
-    return ret;
+    return send_ret;
 }
 
 
@@ -220,23 +235,34 @@ int TcpSocket::sendMessage(const char* message_buff, size_t length) {
 std::string TcpSocket::recvMessage() {
     /* 读数据包头，获取数据块大小 */
     int length = 0;
-    readSpecLength((char*)&length, sizeof(int));
+    int recv_ret = readSpecLength((char*)&length, sizeof(int));
+    if (recv_ret == -1) {
+        std::cerr << "recv message failed" << std::endl;
+        return std::string();
+    }
+    else if (recv_ret == 0) {
+        std::cout << "--------------------对方断开连接--------------------" << std::endl;
+        return std::string();
+    }
+
     length = ntohl(length);  // 大端转换为小端
     std::cout << "--------------------正在接受数据(数据块大小: " << length << ")--------------------"  << std::endl;
 
     /* 分配内存 */
     char* buf = new char[length + 1];
-    int ret = readSpecLength(buf, length);
-    if (ret != length) {
+
+    /* 接受数据 */
+    recv_ret = readSpecLength(buf, length);
+    if (recv_ret != length) {
+        delete[]buf;
         return std::string();
     }
     buf[length] = '\0';
-    std::string ret_string(buf);
+    std::string str(buf);
 
     /* 清理 */
     delete[]buf;
-
-    return ret_string;
+    return str;
 }
 
 #endif  // !TCP_SOCKET_H__
