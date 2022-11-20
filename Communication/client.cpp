@@ -3,9 +3,9 @@
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-17 20:15:00
- * @last_edit_time: 2022-11-20 14:12:17
+ * @last_edit_time: 2022-11-20 14:22:24
  * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/client.cpp
- * @description: 头部注释配置模板
+ * @description: 客户端测试文件
  */
 
 #include "Socket.h"

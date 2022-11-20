@@ -1,3 +1,13 @@
+/**
+ * @author: yuyuyuj1e 807152541@qq.com
+ * @github: https://github.com/yuyuyuj1e
+ * @csdn: https://blog.csdn.net/yuyuyuj1e
+ * @date: 2022-11-20 14:20:42
+ * @last_edit_time: 2022-11-20 14:22:02
+ * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/server.cpp
+ * @description: 服务器测试文件
+ */
+
 #include "Server.h"
 #include <stdio.h>
 #include <iostream>
@@ -33,7 +43,7 @@ int main() {
     // 1. 创建监听的套接字
     TcpServer s;
     // 2. 绑定本地的IP port并设置监听
-    s.setListen(10000);
+    s.setListen(8989);
     // 3. 阻塞并等待客户端的连接
     while (1) {
         SockInfo* info = new SockInfo;
