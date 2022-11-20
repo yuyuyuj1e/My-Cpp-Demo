@@ -3,7 +3,7 @@
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-17 20:15:00
- * @last_edit_time: 2022-11-20 14:22:24
+ * @last_edit_time: 2022-11-20 15:51:15
  * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/client.cpp
  * @description: 客户端测试文件
  */
@@ -21,7 +21,7 @@ int main() {
     TcpSocket tcp;
 
     // 2. 连接服务器
-    int ret = tcp.connectToHost("192.168.11.132", 10000);
+    int ret = tcp.connectToHost("192.168.11.132", 8989);
     if (ret == -1) {
         return -1;
     }
