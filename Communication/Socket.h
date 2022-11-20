@@ -43,6 +43,7 @@ public:
     std::string recvMessage();  // 接收信息
     void closeTcpSocket();  // 关闭套接字
     int connectToHost(std::string, unsigned short);  // 连接服务器
+    struct sockaddr_in getSockaddr();  // 获取通信对方的信息
 };
 
 
@@ -163,7 +164,8 @@ int TcpSocket::connectToHost(std::string ip, unsigned short port) {
         return connect_ret;
     }
     std::cout << "--------------------连接建立成功--------------------" << std::endl;
-    std::cout << "服务器 IP: " << ip << " —— 端口: " << port << std::endl << std::endl;
+    // std::cout << "服务器 IP: " << ip << " —— 端口: " << port << std::endl << std::endl;
+    this->getSockaddr();
 
     return connect_ret;
 }
@@ -263,6 +265,13 @@ std::string TcpSocket::recvMessage() {
     /* 清理 */
     delete[]buf;
     return str;
+}
+
+
+struct sockaddr_in TcpSocket::getSockaddr() {
+    std::cout << "对端 IP: " << inet_ntoa(this->m_saddr.sin_addr)
+        << " —— 端口: " << ntohs(this->m_saddr.sin_port) << std::endl << std::endl;
+    return this->m_saddr;
 }
 
 #endif  // !TCP_SOCKET_H__

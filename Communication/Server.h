@@ -92,7 +92,7 @@ int TcpServer::setListen(in_port_t port, int max_port_size) {
         std::cerr << "listen failed" << std::endl;
         return listen_ret;
     }
-    std::cout << "--------------------开始监听客户端连接请求--------------------" << std::endl << std::endl;
+    std::cout << "--------------------开始监听客户端连接请求--------------------" << std::endl;
 
     return listen_ret;
 }
