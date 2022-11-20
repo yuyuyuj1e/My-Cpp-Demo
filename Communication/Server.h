@@ -92,7 +92,7 @@ int TcpServer::setListen(in_port_t port, int max_port_size) {
         std::cerr << "listen failed" << std::endl;
         return listen_ret;
     }
-    std::cout << "--------------------开始监听客户端连接请求--------------------" << std::endl;
+    std::cout << "--------------------开始监听客户端连接请求--------------------" << std::endl << std::endl;
 
     return listen_ret;
 }
@@ -117,9 +117,9 @@ TcpSocket* TcpServer::acceptConnection(sockaddr_in* addr) {
         std::cerr << "accept failed" << std::endl;
         return nullptr;
     }
-    std::cout << "--------------------与客户端连接--------------------" << std::endl;
     std::cout << "客户端 IP: " << inet_ntoa(addr->sin_addr)
-        << " —— 端口: " << ntohs(addr->sin_port) << std::endl << std::endl << std::endl;
+        << " —— 端口: " << ntohs(addr->sin_port) << "   请求建立连接。。。" << std::endl << std::endl;
+    std::cout << "--------------------与客户端连接--------------------" << std::endl << std::endl;
 
     return new TcpSocket(cfd);
 }

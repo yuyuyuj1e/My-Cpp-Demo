@@ -24,6 +24,7 @@ class TcpSocket {
 private:
     /* 私有成员变量 */
     int m_fd;  // 通信套接字
+    struct sockaddr_in m_saddr;  // sockaddr 端口(2字节) + IP地址(4字节) + 填充(8字节)
 
 private:
     /* 私有成员函数 */
@@ -53,7 +54,10 @@ public:
  * @description: 套接字默认构造函数
  */
 TcpSocket::TcpSocket() 
-    : m_fd(socket(AF_INET, SOCK_STREAM, 0)) { }  // int socket(int domain, int type, int protocol);
+    : m_fd(socket(AF_INET, SOCK_STREAM, 0)) {
+    // int socket(int domain, int type, int protocol);
+    this->m_saddr.sin_family = AF_INET;  // 地址族协议
+}
 
 
 /**
@@ -147,13 +151,11 @@ int TcpSocket::writeSpecLength(const char* message_buff, int length) {
  * @return {int}: 失败返回 -1, 成功返回 0
  */
 int TcpSocket::connectToHost(std::string ip, unsigned short port) {
-    // 连接服务器IP port
-    struct sockaddr_in saddr;
-    saddr.sin_family = AF_INET;
-    saddr.sin_port = htons(port);
-    inet_pton(AF_INET, ip.data(), &saddr.sin_addr.s_addr);
+    /* 将 IP 和端口信息转换为大端存储 */
+    this->m_saddr.sin_port = htons(port);
+    inet_pton(AF_INET, ip.data(), &this->m_saddr.sin_addr.s_addr);
     // int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-    int connect_ret = connect(this->m_fd, (struct sockaddr*)&saddr, sizeof(saddr));
+    int connect_ret = connect(this->m_fd, (struct sockaddr*)&this->m_saddr, sizeof(struct sockaddr));
     if (connect_ret == -1) {
         std::cerr << "connect failed" << std::endl;
         return -1;
