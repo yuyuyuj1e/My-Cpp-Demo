@@ -1,3 +1,6 @@
 ThreadPool/test
 Communication/server
 Communication/client
+demo/client
+demo/server
+.vscode/

@@ -3,7 +3,7 @@
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-10 18:52:49
- * @last_edit_time: 2022-11-19 12:16:47
+ * @last_edit_time: 2022-11-21 11:08:45
  * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/Server.h
  * @description: 封装服务器类，实现绑定端口、监听、接受连接请求等功能
  */
@@ -121,7 +121,7 @@ TcpSocket* TcpServer::acceptConnection(sockaddr_in* addr) {
         << " —— 端口: " << ntohs(addr->sin_port) << "   请求建立连接。。。" << std::endl << std::endl;
     std::cout << "--------------------与客户端连接--------------------" << std::endl << std::endl;
 
-    return new TcpSocket(cfd);
+    return new TcpSocket(cfd, *addr);
 }
 
 #endif  //  TCP_SERVER_H__

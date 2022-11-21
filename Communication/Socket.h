@@ -3,7 +3,7 @@
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-17 19:40:14
- * @last_edit_time: 2022-11-20 11:40:58
+ * @last_edit_time: 2022-11-21 11:09:07
  * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/Socket.h
  * @description: 封装通信套接字类，实现 string/char* 消息发送与接受（有处理 TCP"粘包"）等功能
  */
@@ -34,7 +34,7 @@ private:
 public:
     /* 构造函数与析构函数 */
     TcpSocket();  // 默认构造函数，创建套接字
-    TcpSocket(int);  // 接收一个用于通信的建套接字
+    TcpSocket(int, struct sockaddr_in);  // 接收一个用于通信的建套接字
     ~TcpSocket();  // 关闭连接
 
     /* 接口 */
@@ -65,8 +65,9 @@ TcpSocket::TcpSocket()
  * @description: 服务器创建的套接字
  * @param {int} socket_fd: 服务器传入的通信套接字描述符
  */
-TcpSocket::TcpSocket(int socket_fd) 
-    : m_fd(socket_fd) { }
+TcpSocket::TcpSocket(int socket_fd, struct sockaddr_in saddr) 
+    : m_fd(socket_fd)
+    , m_saddr(saddr) { }
 
 
 /**
