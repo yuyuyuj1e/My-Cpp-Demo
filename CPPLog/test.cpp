@@ -10,31 +10,42 @@
 
 
 #include "CPPLog.h"
+#include "../ThreadPool/ThreadPool.h"
 #include <iostream>
 #include <string>
 #include <chrono>
 
-int main() {
-    CPPLog c;
-    c.openLog("123", LogOpenMode::ADDTO);
-    c.setTimeFormat(TimeFormat::FULLB);
+CPPLog c;
 
+void func1() {
     c.writeLogWithTIme("开始");
 
-    // std::string s("你好");
-    // const char *buf[] = {
-    //     "北凉王府龙盘虎踞于清凉山，千门万户，极土木之盛。"
-    // };
-    // c.writeLogWithTIme(buf[0]);
-
-    // c.writeLog("finish");
-
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 10000; i++) {
         std::cout << i << std::endl;
         c.writeLogWithTIme("hello world");
     }
 
     c.writeLogWithTIme("结束");
+}
+
+
+void func2() {
+    c.writeLogWithTIme("开始");
+
+    for (int i = 0; i < 10000; i++) {
+        std::cout << i << std::endl;
+        c.writeLogWithTIme("你好");
+    }
+
+    c.writeLogWithTIme("结束");
+}
+
+int main() {
+    c.openLog("123", LogOpenMode::ADDTO);
+    c.setTimeFormat(TimeFormat::FULLB);
+    ThreadPool pool(2);
+    pool.submitTask(func1);
+    pool.submitTask(func2);
 
     return 0;
 }

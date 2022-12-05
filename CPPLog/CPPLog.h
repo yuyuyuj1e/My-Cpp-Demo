@@ -51,11 +51,10 @@ private:
     std::string m_log_path;  // 日志文件路径
     std::string m_log_name;  // 日志文件名称
     size_t m_max_log_size;  // 日志文件大小
-    std::mutex m_log_mutex;  // 日志文件互斥锁
+    std::recursive_mutex m_log_mutex;  // 日志文件互斥递归锁
     LogOpenMode m_log_open_mode;  // 日志文件打开方式
     TimeFormat m_time_format;  // 时间格式
     bool m_backup;  // 备份日志文件
-
 
 public:
     /* 构造函数与析构函数 */
@@ -73,7 +72,6 @@ public:
     bool openLog(std::string name, const LogOpenMode mode = LogOpenMode::ADDTO);  // 打开日志文件
     void closeLog();  // 关闭日志文件
 };
-
 
 
 /**
@@ -102,7 +100,6 @@ CPPLog::~CPPLog() {
 }
 
 
-
 /**
  * @description: 打开日志文件
  * @param {string} name: 日志文件名称
@@ -110,6 +107,8 @@ CPPLog::~CPPLog() {
  * @return {bool}: 日志文件打开成功返回 true， 失败返回 false
  */
 bool CPPLog::openLog(std::string name, const LogOpenMode mode) {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+
     /* 关闭日志文件 */
     this->closeLog();
 
@@ -136,6 +135,8 @@ bool CPPLog::openLog(std::string name, const LogOpenMode mode) {
  * @description: 关闭日志文件
  */
 void CPPLog::closeLog() {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+    
     if (this->m_log_fp) {
         this->m_log_fp.close();
         this->m_log_name = "";
@@ -150,6 +151,8 @@ void CPPLog::closeLog() {
  * @param {TimeFormat} ft: 时间格式
  */
 void CPPLog::setTimeFormat(TimeFormat ft) {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+
     this->m_time_format = ft;
 }
 
@@ -203,7 +206,14 @@ std::string CPPLog::getCurrentTime() {
 }
 
 
+/**
+ * @description: 带时间写入日志
+ * @param {string} str: 写入日志的内容
+ * @return {*}
+ */
 void CPPLog::writeLogWithTIme(const std::string str) {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+
     if (!this->m_log_fp) {
         return ;
     }
@@ -215,11 +225,17 @@ void CPPLog::writeLogWithTIme(const std::string str) {
     now_t += " --->  ";
     
     this->m_log_fp << now_t;
-    this->writeLog(str);
+    this->m_log_fp << str << std::endl;
 }
 
 
+/**
+ * @description: 带时间写入日志
+ * @param {char*} str: 写入日志的内容
+ */
 void CPPLog::writeLogWithTIme(const char* str) {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+
     if (!this->m_log_fp) {
         return ;
     }
@@ -230,11 +246,17 @@ void CPPLog::writeLogWithTIme(const char* str) {
     while (now_t.length() != 20) now_t += " ";
     now_t += " --->  ";
     this->m_log_fp << now_t;
-    this->writeLog(str);
+    this->m_log_fp << str << std::endl;
 }
 
 
+/**
+ * @description: 不带时间写入日志
+ * @param {string} str: 写入日志的内容
+ */
 void CPPLog::writeLog(const std::string str) {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+
     if (!this->m_log_fp) {
         return ;
     }
@@ -245,7 +267,13 @@ void CPPLog::writeLog(const std::string str) {
 }
 
 
+/**
+ * @description: 不带时间写入日志
+ * @param {char*} str: 写入日志的内容
+ */
 void CPPLog::writeLog(const char* str) {
+    std::unique_lock<std::recursive_mutex> lock(this->m_log_mutex);
+
     if (!this->m_log_fp) {
         return ;
     }
