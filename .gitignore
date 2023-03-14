@@ -1,4 +1,3 @@
-ThreadPool/test
 Communication/server
 Communication/client
 demo/client
@@ -6,3 +5,4 @@ demo/server
 .vscode/
 CPPLog/test
 CPPLog/Log/*
+build/

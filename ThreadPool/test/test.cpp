@@ -4,7 +4,7 @@
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-10 18:17:23
  * @last_edit_time: 2022-11-17 19:38:01
- * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/ThreadPool/test.cpp
+ * @file_path: /Tiny-Cpp-Frame/ThreadPool/test/test.cpp
  * @description: 线程池测试文件
  */
 
@@ -61,7 +61,7 @@ int main() {
 	}
 
 	// 如果关闭线程池，下面任务无法提交
-	// pool.closeThreadPool();
+	// pool.close();
 
 	pool.setTaskPriority(4);
 	// 使用ref传递的输出参数提交函数
@@ -73,7 +73,6 @@ int main() {
 	} catch(const std::exception& e) {
 		std::cerr << "任务提交失败"  << std::endl;
 	}
-
 
 	// 使用return参数提交函数
 	auto future2 = pool.submitTask(multiply_return, 5, 3);
@@ -92,6 +91,6 @@ int main() {
 	}
 		
 	// 关闭线程池，可手动关闭，也可自动关闭
-	pool.closeThreadPool();
+	pool.close();
 	return 0;
 }
