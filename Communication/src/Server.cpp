@@ -1,43 +1,23 @@
-/**
+/** 
  * @author: yuyuyuj1e 807152541@qq.com
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
- * @date: 2022-11-10 18:52:49
- * @last_edit_time: 2022-11-21 11:08:45
- * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/Server.h
- * @description: 封装服务器类，实现绑定端口、监听、接受连接请求等功能
+ * @date: 2023-03-14 19:28:00
+ * @last_edit_time: 2023-03-14 21:19:48
+ * @file_path: /Tiny-Cpp-Frame/Communication/src/Server.cpp
+ * @description: 服务器类源文件
  */
 
-#ifndef TCP_SERVER_H__
-#define TCP_SERVER_H__
-
+#include "Server.h"
+#include <iostream>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <iostream>
-#include "Socket.h"
-
-class TcpServer {
-private:
-    /* 私有成员变量 */
-    int m_fd;  // 监听套接字
-    struct sockaddr_in m_saddr;  // sockaddr 端口(2字节) + IP地址(4字节) + 填充(8字节)
-public:
-    /* 构造函数与析构函数 */
-    TcpServer();  // 默认构造函数
-    ~TcpServer();  // 析构函数
-
-    /* 接口 */
-    int setListen(in_port_t, int max_port_size = 128);  // 设置监听, in_port_t <==> unsigned short int
-    TcpSocket* acceptConnection(sockaddr_in*);  // 接受客户端连接请求
-    void closeConnection();  // 关闭监听套接字
-};
 
 
 /**
  * @description: 默认构造函数，创建一个用于 TCP 的监听套接字，但是没有设置监听端口，需要在后续设置
  */
-TcpServer::TcpServer()
-    : m_fd(socket(AF_INET, SOCK_STREAM, 0)) {
+TcpServer::TcpServer() : m_fd(socket(AF_INET, SOCK_STREAM, 0)) {
     // int socket(int domain, int type, int protocol);
     this->m_saddr.sin_family = AF_INET;  // 地址族协议
     this->m_saddr.sin_addr.s_addr = INADDR_ANY;  // 0 = 0.0.0.0; 0 大端小端没有区别，因此不需要转换， 绑定为 0 后，会读取本地网卡实际 IP
@@ -123,5 +103,3 @@ TcpSocket* TcpServer::acceptConnection(sockaddr_in* addr) {
 
     return new TcpSocket(cfd, *addr);
 }
-
-#endif  //  TCP_SERVER_H__

@@ -1,10 +1,10 @@
-/*
+/** 
  * @author: yuyuyuj1e 807152541@qq.com
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
- * @date: 2022-11-17 20:15:00
- * @last_edit_time: 2022-11-20 15:51:15
- * @file_path: /Multi-Client-Communication-System-Based-on-Thread-Pool/Communication/client.cpp
+ * @date: 2022-11-20 14:20:42
+ * @last_edit_time: 2023-03-14 21:25:29
+ * @file_path: /Tiny-Cpp-Frame/Communication/test/client.cpp
  * @description: 客户端测试文件
  */
 
