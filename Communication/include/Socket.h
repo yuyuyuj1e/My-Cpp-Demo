@@ -3,7 +3,7 @@
  * @github: https://github.com/yuyuyuj1e
  * @csdn: https://blog.csdn.net/yuyuyuj1e
  * @date: 2022-11-17 19:40:14
- * @last_edit_time: 2023-03-14 21:29:39
+ * @last_edit_time: 2023-03-16 09:56:02
  * @file_path: /Tiny-Cpp-Frame/Communication/include/Socket.h
  * @description: 套接字类头文件
  */
@@ -11,6 +11,9 @@
 #ifndef TCP_SOCKET_H__
 #define TCP_SOCKET_H__
 
+
+#include <arpa/inet.h>
+#include <string>
 
 /*
 ***************************套接字类***************************
@@ -40,8 +43,5 @@ public:
     int connectToHost(std::string, unsigned short);  // 连接服务器(服务于客户端)
     struct sockaddr_in getSockaddr();  // 获取通信对方的信息
 };
-
-
-
 
 #endif  // !TCP_SOCKET_H__
