@@ -10,3 +10,4 @@ set(CMAKE_CXX_STANDARD 11)
 # 添加子目录
 add_subdirectory(${PROJECT_SOURCE_DIR}/ThreadPool)
 add_subdirectory(${PROJECT_SOURCE_DIR}/Communication)
+add_subdirectory(${PROJECT_SOURCE_DIR}/CppLog)
